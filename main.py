@@ -50,8 +50,15 @@ class DungeonGame:
 
         clock = pygame.time.Clock()
 
+        lastDec = -1
+        lastLastDec = -1
+        retreads = 0
+
+        dirs = [(1, 0),(0, 1), (-1, 0),(0, -1)]
+
+        penalty = 0
+
         while run:
-            #clock.tick(30)
 
             giveUp = False
 
@@ -62,18 +69,21 @@ class DungeonGame:
             output = net.activate( self.game.get_inputs() )
             decision = output.index(max(output))
 
-            decRes = False
-            if decision == 0:
-                decRes = self.game.move_player(1, 0)
-            if decision == 1:
-                decRes = self.game.move_player(0, 1)
-            if decision == 2:
-                decRes = self.game.move_player(-1, 0)
-            if decision == 3:
-                decRes = self.game.move_player(0, -1)
+            blocked = not self.game.move_player(dirs[decision][0], dirs[decision][1])
             
-            if(decRes == False):
+            if(blocked):
                 giveUp = True
+                penalty += 50
+        
+            if(dirs[decision][0] + dirs[lastDec][0] == 0 and dirs[decision][1] + dirs[lastDec][1] == 0):
+                retreads += 1
+
+            lastLastDec = lastDec
+            lastDec = decision
+
+            if(retreads > 1):
+                giveUp = True
+                penalty += 50
 
             if(self.game.newMoves > lastNewMoves):
                 closenessScore = (8 - abs(self.game.playerX - self.game.doorx) + 8 - abs(self.game.playerY - self.game.doory)) 
@@ -97,11 +107,11 @@ class DungeonGame:
             if(giveUp):
                 totalMoves += self.game.moves
                 totalNewMoves += self.game.newMoves
-                self.calculate_fitness(genome, wins, stepScore)
+                self.calculate_fitness(genome, wins, stepScore, penalty)
                 break
     
-    def calculate_fitness(self, genome, wins, stepScore):
-        genome.fitness = wins * 80 + stepScore * 0.4 
+    def calculate_fitness(self, genome, wins, stepScore, penalty):
+        genome.fitness = wins * 80 + stepScore * 0.4 - penalty
 
     def test_ai(self, genome, config):
         net = neat.nn.FeedForwardNetwork.create(genome, config)
@@ -155,12 +165,12 @@ def eval_genomes(genomes, config):
 
     for genome_id, genome in genomes:
             game = DungeonGame(window, width, height)
-            game.train_ai(genome, config, True)
+            game.train_ai(genome, config, False)
 
 
 def run_neat(config, draw):
     p = neat.Population(config)
-    p = neat.Checkpointer.restore_checkpoint('neat-checkpoint-77')
+    #p = neat.Checkpointer.restore_checkpoint('neat-checkpoint-163')
 
     p.add_reporter(neat.StdOutReporter(True))
     stats = neat.StatisticsReporter()
@@ -190,5 +200,5 @@ if __name__ == "__main__":
                          config_path)
     
     #test_game()
-    #run_neat(config, True)
-    test_ai(config)
+    run_neat(config, True)
+    #test_ai(config)
