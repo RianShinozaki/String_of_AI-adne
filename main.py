@@ -5,8 +5,8 @@ import neat
 import pickle
 
 class DungeonGame:
-    def __init__(self, window, width, height):
-        self.game = Game(window, width, height)
+    def __init__(self, window, width, height, darkness = 200):
+        self.game = Game(window, width, height, darkness)
 
     def test_game(self):
         run = True
@@ -37,12 +37,14 @@ class DungeonGame:
             self.game.draw()
             pygame.display.update()
     
-    def train_ai(self, genome, config):
+    def train_ai(self, genome, config, draw):
         net = neat.nn.FeedForwardNetwork.create(genome, config)
         run = True
 
         totalMoves = 0
+        totalOkayMoves = 0
         totalNewMoves = 0
+        bestCloseness = 0
         wins = 0
 
         while run:
@@ -61,11 +63,16 @@ class DungeonGame:
             if decision == 3:
                 self.game.move_player(0, -1)
             
-            self.game.draw()
-            pygame.display.update()
+            closenessScore = (16 - abs(self.game.playerX - self.game.doorx) + 16 - abs(self.game.playerY - self.game.doory)) 
+            if(closenessScore > bestCloseness):
+                bestCloseness = closenessScore
+
+            if(draw):
+                self.game.draw()
+                pygame.display.update()
 
             if(self.game.gameState == 1):
-                totalMoves += self.game.moves
+                totalOkayMoves += self.game.okayMoves
                 totalNewMoves += self.game.newMoves
                 wins += 1
                 self.game.restart()
@@ -73,12 +80,11 @@ class DungeonGame:
             if(self.game.moves > 200 or wins > 6):
                 totalMoves += self.game.moves
                 totalNewMoves += self.game.newMoves
-                self.calculate_fitness(genome, totalMoves, wins, totalNewMoves)
+                self.calculate_fitness(genome, wins, totalNewMoves, bestCloseness)
                 break
     
-    def calculate_fitness(self, genome, totalMoves, wins, newMoves):
-        closenessScore = (16 - abs(self.game.playerX - self.game.doorx) + 16 - abs(self.game.playerY - self.game.doory)) * 4
-        genome.fitness = wins * 80 + newMoves + closenessScore - totalMoves
+    def calculate_fitness(self, genome, wins, newMoves, closenessScore):
+        genome.fitness = wins * 80 + newMoves * 2 + closenessScore * 4 
 
     def test_ai(self, genome, config):
         net = neat.nn.FeedForwardNetwork.create(genome, config)
@@ -123,7 +129,7 @@ class DungeonGame:
 def test_game():
     width, height = 640, 640
     window = pygame.display.set_mode((width, height))
-    game = DungeonGame(window, width, height)
+    game = DungeonGame(window, width, height, darkness = 256)
     game.test_game()
 
 def eval_genomes(genomes, config):
@@ -132,19 +138,19 @@ def eval_genomes(genomes, config):
 
     for genome_id, genome in genomes:
             game = DungeonGame(window, width, height)
-            game.train_ai(genome, config)
+            game.train_ai(genome, config, False)
 
 
-def run_neat(config):
+def run_neat(config, draw):
     #p = neat.Population(config)
-    p = neat.Checkpointer.restore_checkpoint('neat-checkpoint-98')
+    p = neat.Checkpointer.restore_checkpoint('neat-checkpoint-232')
 
     p.add_reporter(neat.StdOutReporter(True))
     stats = neat.StatisticsReporter()
     p.add_reporter(stats)
     p.add_reporter(neat.Checkpointer(1))
 
-    winner = p.run(eval_genomes, 150)
+    winner = p.run(eval_genomes, 500)
     with open("best.pickle", "wb") as f:
         pickle.dump(winner, f)
     
@@ -166,6 +172,6 @@ if __name__ == "__main__":
                          neat.DefaultSpeciesSet, neat.DefaultStagnation,
                          config_path)
     
-    test_game()
-    #run_neat(config)
+    #test_game()
+    run_neat(config, True)
     #test_ai(config)

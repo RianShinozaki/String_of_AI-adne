@@ -7,7 +7,7 @@ pygame.init()
 # 8 - wall
 # 7 - unmapped
 # 6 - footsteps
-# 5 - door
+# 2 - door
 
 class GameInformation:
     def __init__(self, moves, gameState):
@@ -29,7 +29,7 @@ class Game:
 
     def generate_maze(self):
         
-        random.seed(456)
+        random.seed(406)
 
         #Populate the maze with breakable walls        
         self.map = [[7 for x in range(self.MAPLENGTH)] for y in range(self.MAPLENGTH)]
@@ -102,18 +102,6 @@ class Game:
                     else:
                         tunneling = False
                         searching = False
-        
-        #Make sure the door is placed properly
-        addDoor = (self.doorx == 1 and self.doory == 14)
-        if(not addDoor):
-           self.map[self.doorx][self.doory] = 5
-
-        while(addDoor):
-            self.doorx = random.randint(1, 14)
-            self.doory = random.randint(1, 14)
-            if(self.map[self.doorx][self.doory] < 5):
-                self.map[self.doorx][self.doory] = 5
-                addDoor = False
 
         #Create spacious starting area
 
@@ -131,16 +119,26 @@ class Game:
         for x in range(self.MAPLENGTH):
             for y in range(self.MAPLENGTH):
                 if(self.map[x][y] < 4):
-                    self.map[x][y] == 0
+                    self.map[x][y] = 0
                 if(self.map[x][y] == 7):
-                    self.map[x][y] == 8
+                    self.map[x][y] = 8
 
         self.map[2][13] = 9
         
+        #Make sure the door is placed properly
+        addDoor = (self.doorx == 1 and self.doory == 14)
+        if(not addDoor):
+           self.map[self.doorx][self.doory] = 2
 
+        while(addDoor):
+            self.doorx = random.randint(1, 14)
+            self.doory = random.randint(1, 14)
+            if(self.map[self.doorx][self.doory] == 0):
+                self.map[self.doorx][self.doory] = 2
+                addDoor = False
         
 
-    def __init__(self, window, window_width, window_height):
+    def __init__(self, window, window_width, window_height, darkness = 200):
         self.window_width = window_width
         self.window_height = window_height
         self.window = window
@@ -154,6 +152,7 @@ class Game:
         self.map[self.playerX][self.playerY] = 9
 
         self.moves = 0
+        self.okayMoves = 0
         self.newMoves = 0
 
         self.PLAYERIMAGE = pygame.image.load("Dungeon/Theseus.png").convert()
@@ -173,7 +172,7 @@ class Game:
 
         self.DARKNESSIMAGE = pygame.image.load("Dungeon/Darkness.png").convert_alpha()
         self.DARKNESSIMAGE = pygame.transform.scale(self.DARKNESSIMAGE, (640*2, 640*2))
-        self.DARKNESSIMAGE.set_alpha(128)
+        self.DARKNESSIMAGE.set_alpha(darkness)
 
     def draw(self):
         if(self.gameState == 0):
@@ -190,13 +189,17 @@ class Game:
                         self.window.blit(self.FOOTSTEPIMAGE, (x* self.CELLSIZE, y* self.CELLSIZE) )
                     else:
                         self.window.blit(self.FLOORIMAGE, (x* self.CELLSIZE, y* self.CELLSIZE) )
+
+                    #num = self.GAME_FONT.render(f"{self.map[x][y]}", 1, self.RED)
+                    #num = pygame.transform.scale(num, (16, 16))
+                    #self.window.blit(num, (x * self.CELLSIZE, y * self.CELLSIZE))
                     #elif(self.map[x][y] == 5):
                         #self.window.blit(self.DOORIMAGE, (x* self.CELLSIZE, y* self.CELLSIZE) )
             
             self.window.blit(self.DARKNESSIMAGE, (self.playerX * self.CELLSIZE - 640, self.playerY * self.CELLSIZE - 640 + 32) )
             self.window.blit(self.DOORIMAGE, (self.doorx* self.CELLSIZE, self.doory* self.CELLSIZE) )
 
-            moves_score = self.GAME_FONT.render("MOVES: " + f"{self.newMoves}", 1, self.RED)
+            moves_score = self.GAME_FONT.render("MOVES: " + f"{self.okayMoves}", 1, self.RED)
             self.window.blit(moves_score, (self.MAPLENGTH * self.CELLSIZE / 2, self.MAPLENGTH * self.CELLSIZE))
         if(self.gameState == 1):
             self.window.fill(self.BLACK)
@@ -212,17 +215,17 @@ class Game:
             self.map[self.playerX][self.playerY] = 6
             self.playerX += x
             self.playerY += y
+            self.okayMoves += 1
             if(self.map[self.playerX][self.playerY] == 0):
                 self.newMoves += 1
 
-            if(self.map[self.playerX][self.playerY] == 5):
+            if(self.map[self.playerX][self.playerY] == 2):
                 self.gameState = 1
 
-            self.map[self.playerX][self.playerY] = 9       
-        game_info = GameInformation(
-            self.moves, self.gameState)
+            self.map[self.playerX][self.playerY] = 9    
+            return True   
 
-        return game_info
+        return False
 
     def get_inputs(self):
         wall_left1 = self.map[self.playerX - 1][self.playerY]
@@ -265,7 +268,9 @@ class Game:
         #print("wall_down2 ", wall_down2)
 
         #return (wall_left1, wall_right1, wall_down1, wall_up1, self.playerX, self.playerY, self.doorx, self.doory)
+        #return (wall_left1, wall_right1, wall_down1, wall_up1, wall_upleft, wall_upright, wall_downleft, wall_downright, wall_left2, wall_right2, wall_down2, wall_up2, self.playerX, self.playerY, self.doorx, self.doory, self.doorx - self.playerX, self.doory - self.playerY)
         return (wall_left1, wall_right1, wall_down1, wall_up1, wall_upleft, wall_upright, wall_downleft, wall_downright, wall_left2, wall_right2, wall_down2, wall_up2, self.playerX, self.playerY, self.doorx, self.doory)
+        #return (wall_left1, wall_right1, wall_down1, wall_up1, wall_upleft, wall_upright, wall_downleft, wall_downright, wall_left2, wall_right2, wall_down2, wall_up2, self.doorx - self.playerX, self.doory - self.playerY)
 
     def restart(self):
         self.playerX = 2
@@ -273,6 +278,7 @@ class Game:
         self.moves = 0
         self.gameState = 0
         self.newMoves = 0
+        self.okayMoves = 0
         self.generate_maze()
     
         
