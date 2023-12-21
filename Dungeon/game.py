@@ -29,7 +29,7 @@ class Game:
 
     def generate_maze(self):
         
-        random.seed(406)
+        random.seed(38)
 
         #Populate the maze with breakable walls        
         self.map = [[7 for x in range(self.MAPLENGTH)] for y in range(self.MAPLENGTH)]

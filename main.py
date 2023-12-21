@@ -47,7 +47,11 @@ class DungeonGame:
         bestCloseness = 0
         wins = 0
 
+        clock = pygame.time.Clock()
+
         while run:
+            #clock.tick(30)
+
             giveUp = False
 
             for event in pygame.event.get():
@@ -71,8 +75,6 @@ class DungeonGame:
                 giveUp = True
 
             closenessScore = (16 - abs(self.game.playerX - self.game.doorx) + 16 - abs(self.game.playerY - self.game.doory)) 
-            if(closenessScore > bestCloseness):
-                bestCloseness = closenessScore
 
             if(draw):
                 self.game.draw()
@@ -90,7 +92,7 @@ class DungeonGame:
             if(giveUp):
                 totalMoves += self.game.moves
                 totalNewMoves += self.game.newMoves
-                self.calculate_fitness(genome, wins, totalNewMoves, bestCloseness)
+                self.calculate_fitness(genome, wins, totalNewMoves, closenessScore)
                 break
     
     def calculate_fitness(self, genome, wins, newMoves, closenessScore):
@@ -182,6 +184,6 @@ if __name__ == "__main__":
                          neat.DefaultSpeciesSet, neat.DefaultStagnation,
                          config_path)
     
-    test_game()
-    #run_neat(config, True)
+    #test_game()
+    run_neat(config, True)
     #test_ai(config)
