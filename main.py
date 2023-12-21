@@ -4,7 +4,7 @@ from Dungeon import Game
 import neat
 import pickle
 
-class MazeGame:
+class DungeonGame:
     def __init__(self, window, width, height):
         self.game = Game(window, width, height)
 
@@ -115,13 +115,13 @@ class MazeGame:
 
     def calculate_fitness(self, genome, totalMoves, wins, newMoves):
         closenessScore = (16 - abs(self.game.playerX - self.game.doorx) + 16 - abs(self.game.playerY - self.game.doory)) * 4
-        genome.fitness = wins * 50 + newMoves + closenessScore
+        genome.fitness = wins * 50 + newMoves + closenessScore - totalMoves
 
 
 def test_game():
     width, height = 640, 640
     window = pygame.display.set_mode((width, height))
-    game = MazeGame(window, width, height)
+    game = DungeonGame(window, width, height)
     game.test_game()
 
 def eval_genomes(genomes, config):
@@ -129,13 +129,13 @@ def eval_genomes(genomes, config):
     window = pygame.display.set_mode((width, height))
 
     for genome_id, genome in genomes:
-            game = MazeGame(window, width, height)
+            game = DungeonGame(window, width, height)
             game.train_ai(genome, config)
 
 
 def run_neat(config):
     p = neat.Population(config)
-    p = neat.Checkpointer.restore_checkpoint('neat-checkpoint-85')
+    #p = neat.Checkpointer.restore_checkpoint('neat-checkpoint-85')
 
     p.add_reporter(neat.StdOutReporter(True))
     stats = neat.StatisticsReporter()
@@ -165,5 +165,5 @@ if __name__ == "__main__":
                          config_path)
     
     #test_game()
-    #run_neat(config)
-    test_ai(config)
+    run_neat(config)
+    #test_ai(config)
