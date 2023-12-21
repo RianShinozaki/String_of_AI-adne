@@ -48,21 +48,28 @@ class DungeonGame:
         wins = 0
 
         while run:
+            giveUp = False
+
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     quit()
             
             output = net.activate( self.game.get_inputs() )
             decision = output.index(max(output))
+
+            decRes = False
             if decision == 0:
-                self.game.move_player(1, 0)
+                decRes = self.game.move_player(1, 0)
             if decision == 1:
-                self.game.move_player(0, 1)
+                decRes = self.game.move_player(0, 1)
             if decision == 2:
-                self.game.move_player(-1, 0)
+                decRes = self.game.move_player(-1, 0)
             if decision == 3:
-                self.game.move_player(0, -1)
+                decRes = self.game.move_player(0, -1)
             
+            if(decRes == False):
+                giveUp = True
+
             closenessScore = (16 - abs(self.game.playerX - self.game.doorx) + 16 - abs(self.game.playerY - self.game.doory)) 
             if(closenessScore > bestCloseness):
                 bestCloseness = closenessScore
@@ -78,6 +85,9 @@ class DungeonGame:
                 self.game.restart()
 
             if(self.game.moves > 200 or wins > 6):
+                giveUp = True
+
+            if(giveUp):
                 totalMoves += self.game.moves
                 totalNewMoves += self.game.newMoves
                 self.calculate_fitness(genome, wins, totalNewMoves, bestCloseness)
@@ -142,8 +152,8 @@ def eval_genomes(genomes, config):
 
 
 def run_neat(config, draw):
-    #p = neat.Population(config)
-    p = neat.Checkpointer.restore_checkpoint('neat-checkpoint-232')
+    p = neat.Population(config)
+    #p = neat.Checkpointer.restore_checkpoint('neat-checkpoint-232')
 
     p.add_reporter(neat.StdOutReporter(True))
     stats = neat.StatisticsReporter()
@@ -172,6 +182,6 @@ if __name__ == "__main__":
                          neat.DefaultSpeciesSet, neat.DefaultStagnation,
                          config_path)
     
-    #test_game()
-    run_neat(config, True)
+    test_game()
+    #run_neat(config, True)
     #test_ai(config)
