@@ -86,7 +86,7 @@ class DungeonGame:
                 penalty += 50
 
             if(self.game.newMoves > lastNewMoves):
-                closenessScore = (8 - abs(self.game.playerX - self.game.doorx) + 8 - abs(self.game.playerY - self.game.doory)) 
+                closenessScore = (16 - abs(self.game.playerX - self.game.doorx) + 16 - abs(self.game.playerY - self.game.doory)) 
                 stepScore += closenessScore
                 lastNewMoves = self.game.newMoves
 
@@ -164,13 +164,13 @@ def eval_genomes(genomes, config):
     window = pygame.display.set_mode((width, height))
 
     for genome_id, genome in genomes:
-            game = DungeonGame(window, width, height)
-            game.train_ai(genome, config, False)
+            game = DungeonGame(window, width, height, darkness = 256)
+            game.train_ai(genome, config, True)
 
 
 def run_neat(config, draw):
     p = neat.Population(config)
-    #p = neat.Checkpointer.restore_checkpoint('neat-checkpoint-163')
+    p = neat.Checkpointer.restore_checkpoint('neat-checkpoint-67')
 
     p.add_reporter(neat.StdOutReporter(True))
     stats = neat.StatisticsReporter()
