@@ -44,7 +44,8 @@ class DungeonGame:
         totalMoves = 0
         totalOkayMoves = 0
         totalNewMoves = 0
-        bestCloseness = 0
+        lastNewMoves = 0
+        stepScore = 0
         wins = 0
 
         clock = pygame.time.Clock()
@@ -74,7 +75,10 @@ class DungeonGame:
             if(decRes == False):
                 giveUp = True
 
-            closenessScore = (16 - abs(self.game.playerX - self.game.doorx) + 16 - abs(self.game.playerY - self.game.doory)) 
+            if(self.game.newMoves > lastNewMoves):
+                closenessScore = (8 - abs(self.game.playerX - self.game.doorx) + 8 - abs(self.game.playerY - self.game.doory)) 
+                stepScore += closenessScore
+                lastNewMoves = self.game.newMoves
 
             if(draw):
                 self.game.draw()
@@ -85,6 +89,7 @@ class DungeonGame:
                 totalNewMoves += self.game.newMoves
                 wins += 1
                 self.game.restart()
+                lastNewMoves = 0
 
             if(self.game.moves > 200 or wins > 6):
                 giveUp = True
@@ -92,11 +97,11 @@ class DungeonGame:
             if(giveUp):
                 totalMoves += self.game.moves
                 totalNewMoves += self.game.newMoves
-                self.calculate_fitness(genome, wins, totalNewMoves, closenessScore)
+                self.calculate_fitness(genome, wins, stepScore)
                 break
     
-    def calculate_fitness(self, genome, wins, newMoves, closenessScore):
-        genome.fitness = wins * 80 + newMoves * 2 + closenessScore * 4 
+    def calculate_fitness(self, genome, wins, stepScore):
+        genome.fitness = wins * 80 + stepScore * 0.4 
 
     def test_ai(self, genome, config):
         net = neat.nn.FeedForwardNetwork.create(genome, config)
@@ -150,12 +155,12 @@ def eval_genomes(genomes, config):
 
     for genome_id, genome in genomes:
             game = DungeonGame(window, width, height)
-            game.train_ai(genome, config, False)
+            game.train_ai(genome, config, True)
 
 
 def run_neat(config, draw):
     p = neat.Population(config)
-    #p = neat.Checkpointer.restore_checkpoint('neat-checkpoint-232')
+    p = neat.Checkpointer.restore_checkpoint('neat-checkpoint-77')
 
     p.add_reporter(neat.StdOutReporter(True))
     stats = neat.StatisticsReporter()
@@ -185,5 +190,5 @@ if __name__ == "__main__":
                          config_path)
     
     #test_game()
-    run_neat(config, True)
-    #test_ai(config)
+    #run_neat(config, True)
+    test_ai(config)
