@@ -76,6 +76,10 @@ class DungeonGame:
                 self.calculate_fitness(genome, totalMoves, wins, totalNewMoves)
                 break
     
+    def calculate_fitness(self, genome, totalMoves, wins, newMoves):
+        closenessScore = (16 - abs(self.game.playerX - self.game.doorx) + 16 - abs(self.game.playerY - self.game.doory)) * 4
+        genome.fitness = wins * 80 + newMoves + closenessScore - totalMoves
+
     def test_ai(self, genome, config):
         net = neat.nn.FeedForwardNetwork.create(genome, config)
         run = True
@@ -113,9 +117,7 @@ class DungeonGame:
                 wins += 1
                 self.game.restart()
 
-    def calculate_fitness(self, genome, totalMoves, wins, newMoves):
-        closenessScore = (16 - abs(self.game.playerX - self.game.doorx) + 16 - abs(self.game.playerY - self.game.doory)) * 4
-        genome.fitness = wins * 50 + newMoves + closenessScore - totalMoves
+    
 
 
 def test_game():
@@ -134,8 +136,8 @@ def eval_genomes(genomes, config):
 
 
 def run_neat(config):
-    p = neat.Population(config)
-    #p = neat.Checkpointer.restore_checkpoint('neat-checkpoint-85')
+    #p = neat.Population(config)
+    p = neat.Checkpointer.restore_checkpoint('neat-checkpoint-98')
 
     p.add_reporter(neat.StdOutReporter(True))
     stats = neat.StatisticsReporter()
@@ -153,7 +155,7 @@ def test_ai(config):
     with open("best.pickle", "rb") as f:
         winner = pickle.load(f)
 
-    game = MazeGame(window, width, height)
+    game = DungeonGame(window, width, height)
     game.test_ai(winner, config)
 
 if __name__ == "__main__":
@@ -164,6 +166,6 @@ if __name__ == "__main__":
                          neat.DefaultSpeciesSet, neat.DefaultStagnation,
                          config_path)
     
-    #test_game()
-    run_neat(config)
+    test_game()
+    #run_neat(config)
     #test_ai(config)
