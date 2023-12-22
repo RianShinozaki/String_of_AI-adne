@@ -73,7 +73,7 @@ class DungeonGame:
             
             if(blocked):
                 giveUp = True
-                penalty += 50
+                penalty += 20
         
             if(dirs[decision][0] + dirs[lastDec][0] == 0 and dirs[decision][1] + dirs[lastDec][1] == 0):
                 retreads += 1
@@ -83,7 +83,7 @@ class DungeonGame:
 
             if(retreads > 1):
                 giveUp = True
-                penalty += 50
+                penalty += 20
 
             if(self.game.newMoves > lastNewMoves):
                 closenessScore = (16 - abs(self.game.playerX - self.game.doorx) + 16 - abs(self.game.playerY - self.game.doory)) 
@@ -111,7 +111,7 @@ class DungeonGame:
                 break
     
     def calculate_fitness(self, genome, wins, stepScore, penalty):
-        genome.fitness = wins * 60 + stepScore * 0.15 - penalty
+        genome.fitness = wins * 40 + stepScore * 0.01 - penalty
 
     def test_ai(self, genome, config):
         net = neat.nn.FeedForwardNetwork.create(genome, config)
@@ -170,7 +170,7 @@ def eval_genomes(genomes, config):
 
 def run_neat(config, draw):
     p = neat.Population(config)
-    #p = neat.Checkpointer.restore_checkpoint('neat-checkpoint-67')
+    #p = neat.Checkpointer.restore_checkpoint('neat-checkpoint-30')
 
     p.add_reporter(neat.StdOutReporter(True))
     stats = neat.StatisticsReporter()
@@ -200,5 +200,5 @@ if __name__ == "__main__":
                          config_path)
     
     #test_game()
-    #run_neat(config, True)
+    run_neat(config, True)
     test_ai(config)

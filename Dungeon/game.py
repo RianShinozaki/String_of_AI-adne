@@ -29,7 +29,7 @@ class Game:
 
     def generate_maze(self):
         
-        random.seed(905)
+        #random.seed(905)
 
         #Populate the maze with breakable walls        
         self.map = [[7 for x in range(self.MAPLENGTH)] for y in range(self.MAPLENGTH)]
@@ -196,7 +196,7 @@ class Game:
                     #elif(self.map[x][y] == 5):
                         #self.window.blit(self.DOORIMAGE, (x* self.CELLSIZE, y* self.CELLSIZE) )
             
-            self.window.blit(self.DARKNESSIMAGE, (self.playerX * self.CELLSIZE - 640, self.playerY * self.CELLSIZE - 640 + 32) )
+            #self.window.blit(self.DARKNESSIMAGE, (self.playerX * self.CELLSIZE - 640, self.playerY * self.CELLSIZE - 640 + 32) )
             self.window.blit(self.DOORIMAGE, (self.doorx* self.CELLSIZE, self.doory* self.CELLSIZE) )
 
             moves_score = self.GAME_FONT.render("MOVES: " + f"{self.okayMoves}", 1, self.RED)
@@ -269,6 +269,7 @@ class Game:
 
         #return (wall_left1, wall_right1, wall_down1, wall_up1, self.playerX, self.playerY, self.doorx, self.doory)
         #return (wall_left1, wall_right1, wall_down1, wall_up1, wall_upleft, wall_upright, wall_downleft, wall_downright, wall_left2, wall_right2, wall_down2, wall_up2, self.playerX, self.playerY, self.doorx, self.doory, self.doorx - self.playerX, self.doory - self.playerY)
+        return (wall_left1, wall_right1, wall_down1, wall_up1, self.doorx - self.playerX, self.doory - self.playerY)
         return (wall_left1, wall_right1, wall_down1, wall_up1, wall_upleft, wall_upright, wall_downleft, wall_downright, wall_left2, wall_right2, wall_down2, wall_up2, self.playerX, self.playerY, self.doorx, self.doory)
         #return (wall_left1, wall_right1, wall_down1, wall_up1, wall_upleft, wall_upright, wall_downleft, wall_downright, wall_left2, wall_right2, wall_down2, wall_up2, self.doorx - self.playerX, self.doory - self.playerY)
 
