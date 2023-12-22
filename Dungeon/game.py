@@ -196,7 +196,7 @@ class Game:
                     #elif(self.map[x][y] == 5):
                         #self.window.blit(self.DOORIMAGE, (x* self.CELLSIZE, y* self.CELLSIZE) )
             
-            #self.window.blit(self.DARKNESSIMAGE, (self.playerX * self.CELLSIZE - 640, self.playerY * self.CELLSIZE - 640 + 32) )
+            self.window.blit(self.DARKNESSIMAGE, (self.playerX * self.CELLSIZE - 640, self.playerY * self.CELLSIZE - 640 + 32) )
             self.window.blit(self.DOORIMAGE, (self.doorx* self.CELLSIZE, self.doory* self.CELLSIZE) )
 
             moves_score = self.GAME_FONT.render("MOVES: " + f"{self.okayMoves}", 1, self.RED)

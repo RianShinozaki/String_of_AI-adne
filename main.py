@@ -111,7 +111,7 @@ class DungeonGame:
                 break
     
     def calculate_fitness(self, genome, wins, stepScore, penalty):
-        genome.fitness = wins * 80 + stepScore * 0.4 - penalty
+        genome.fitness = wins * 60 + stepScore * 0.15 - penalty
 
     def test_ai(self, genome, config):
         net = neat.nn.FeedForwardNetwork.create(genome, config)
@@ -164,13 +164,13 @@ def eval_genomes(genomes, config):
     window = pygame.display.set_mode((width, height))
 
     for genome_id, genome in genomes:
-            game = DungeonGame(window, width, height, darkness = 256)
+            game = DungeonGame(window, width, height, darkness = 200)
             game.train_ai(genome, config, True)
 
 
 def run_neat(config, draw):
     p = neat.Population(config)
-    p = neat.Checkpointer.restore_checkpoint('neat-checkpoint-67')
+    #p = neat.Checkpointer.restore_checkpoint('neat-checkpoint-67')
 
     p.add_reporter(neat.StdOutReporter(True))
     stats = neat.StatisticsReporter()
@@ -200,5 +200,5 @@ if __name__ == "__main__":
                          config_path)
     
     #test_game()
-    run_neat(config, True)
-    #test_ai(config)
+    #run_neat(config, True)
+    test_ai(config)
