@@ -27,9 +27,10 @@ class Game:
     def lookFor(self, x, y, type):
         return (self.map[x][y] == type)
 
-    def generate_maze(self):
+    def generate_maze(self, seed = -1):
         
-        #random.seed(905)
+        if(seed != -1):
+            random.seed(seed)
 
         #Populate the maze with breakable walls        
         self.map = [[7 for x in range(self.MAPLENGTH)] for y in range(self.MAPLENGTH)]
@@ -126,9 +127,9 @@ class Game:
         self.map[2][13] = 9
         
         #Make sure the door is placed properly
-        addDoor = (self.doorx == 1 and self.doory == 14)
-        if(not addDoor):
-           self.map[self.doorx][self.doory] = 2
+        addDoor = True #(self.doorx == 1 and self.doory == 14)
+        #if(not addDoor):
+           #self.map[self.doorx][self.doory] = 2
 
         while(addDoor):
             self.doorx = random.randint(1, 14)
@@ -138,13 +139,13 @@ class Game:
                 addDoor = False
         
 
-    def __init__(self, window, window_width, window_height, darkness = 200):
+    def __init__(self, window, window_width, window_height, darkness = 200, seed = -1):
         self.window_width = window_width
         self.window_height = window_height
         self.window = window
         self.gameState = 0
 
-        self.generate_maze()
+        self.generate_maze(seed)
 
         self.playerX = 2
         self.playerY = 13
@@ -268,18 +269,16 @@ class Game:
         #print("wall_down2 ", wall_down2)
 
         #return (wall_left1, wall_right1, wall_down1, wall_up1, self.playerX, self.playerY, self.doorx, self.doory)
-        #return (wall_left1, wall_right1, wall_down1, wall_up1, wall_upleft, wall_upright, wall_downleft, wall_downright, wall_left2, wall_right2, wall_down2, wall_up2, self.playerX, self.playerY, self.doorx, self.doory, self.doorx - self.playerX, self.doory - self.playerY)
         return (wall_left1, wall_right1, wall_down1, wall_up1, self.doorx - self.playerX, self.doory - self.playerY)
-        return (wall_left1, wall_right1, wall_down1, wall_up1, wall_upleft, wall_upright, wall_downleft, wall_downright, wall_left2, wall_right2, wall_down2, wall_up2, self.playerX, self.playerY, self.doorx, self.doory)
         #return (wall_left1, wall_right1, wall_down1, wall_up1, wall_upleft, wall_upright, wall_downleft, wall_downright, wall_left2, wall_right2, wall_down2, wall_up2, self.doorx - self.playerX, self.doory - self.playerY)
 
-    def restart(self):
+    def restart(self, seed):
         self.playerX = 2
         self.playerY = 13
         self.moves = 0
         self.gameState = 0
         self.newMoves = 0
         self.okayMoves = 0
-        self.generate_maze()
+        self.generate_maze(seed)
     
         

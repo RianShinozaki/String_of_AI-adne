@@ -4,9 +4,11 @@ from Dungeon import Game
 import neat
 import pickle
 
+globalSeed = 0
+
 class DungeonGame:
-    def __init__(self, window, width, height, darkness = 200):
-        self.game = Game(window, width, height, darkness)
+    def __init__(self, window, width, height, darkness = 200, seed = -1):
+        self.game = Game(window, width, height, darkness, seed)
 
     def test_game(self):
         run = True
@@ -37,7 +39,7 @@ class DungeonGame:
             self.game.draw()
             pygame.display.update()
     
-    def train_ai(self, genome, config, draw):
+    def train_ai(self, genome, config, draw, seed = -1):
         net = neat.nn.FeedForwardNetwork.create(genome, config)
         run = True
 
@@ -98,7 +100,8 @@ class DungeonGame:
                 totalOkayMoves += self.game.okayMoves
                 totalNewMoves += self.game.newMoves
                 wins += 1
-                self.game.restart()
+                self.game.restart(seed)
+                seed += 1
                 lastNewMoves = 0
 
             if(self.game.moves > 200 or wins > 6):
@@ -108,7 +111,7 @@ class DungeonGame:
                 totalMoves += self.game.moves
                 totalNewMoves += self.game.newMoves
                 self.calculate_fitness(genome, wins, stepScore, penalty)
-                break
+                return seed
     
     def calculate_fitness(self, genome, wins, stepScore, penalty):
         genome.fitness = wins * 40 + stepScore * 0.01 - penalty
@@ -148,7 +151,7 @@ class DungeonGame:
                 totalMoves += self.game.moves
                 totalNewMoves += self.game.newMoves
                 wins += 1
-                self.game.restart()
+                self.game.restart(SEED)
 
     
 
@@ -162,15 +165,15 @@ def test_game():
 def eval_genomes(genomes, config):
     width, height = 640, 640
     window = pygame.display.set_mode((width, height))
-
+    global globalSeed
     for genome_id, genome in genomes:
-            game = DungeonGame(window, width, height, darkness = 200)
-            game.train_ai(genome, config, True)
+            game = DungeonGame(window, width, height, darkness = 256, seed = globalSeed)
+            globalSeed = game.train_ai(genome, config, True, globalSeed)
 
 
 def run_neat(config, draw):
     p = neat.Population(config)
-    #p = neat.Checkpointer.restore_checkpoint('neat-checkpoint-30')
+    #p = neat.Checkpointer.restore_checkpoint('neat-checkpoint-40')
 
     p.add_reporter(neat.StdOutReporter(True))
     stats = neat.StatisticsReporter()
@@ -192,6 +195,8 @@ def test_ai(config):
     game.test_ai(winner, config)
 
 if __name__ == "__main__":
+    globalSeed = 456
+
     local_dir = os.path.dirname(__file__)
     config_path = os.path.join(local_dir, "config.txt")
 
